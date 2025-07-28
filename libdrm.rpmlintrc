@@ -1,0 +1,6 @@
+# The common package is libdrm-common...
+addFilter("E: explicit-lib-dependency")
+
+# ...and there is stuff in %%_datadir
+addFilter("E: outside-libdir-files")
+addFilter("W: only-non-binary-in-usr-lib")
