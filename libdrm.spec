@@ -1,86 +1,101 @@
-# libdrm is used by wine and steam
+# Libdrm is used by wine and steam
 %ifarch %{x86_64}
 %bcond_without compat32
 %else
 %bcond_with compat32
 %endif
 
-%define major 2
-%define libname %mklibname drm %{major}
-%define devname %mklibname drm -d
-%define lib32name libdrm%{major}
-%define dev32name libdrm-devel
+%define	major 2
+%define	libname %mklibname drm %{major}
+%define	devname %mklibname drm -d
+%define	lib32name libdrm%{major}
+%define	dev32name libdrm-devel
 
-%define intel_major 1
-%define libintel %mklibname drm_intel %{intel_major}
-%define lib32intel libdrm_intel%{intel_major}
-%define nouveau_major 2
-%define libnouveau %mklibname drm_nouveau %{nouveau_major}
-%define lib32nouveau libdrm_nouveau%{nouveau_major}
-%define radeon_major 1
-%define libradeon %mklibname drm_radeon %{radeon_major}
-%define lib32radeon libdrm_radeon%{radeon_major}
-# amdgpu
-%define amdgpu_major 1
-%define libamdgpu %mklibname drm_amdgpu %{amdgpu_major}
-%define lib32amdgpu libdrm_amdgpu%{amdgpu_major}
+%define	intel_major 1
+%define	libintel %mklibname drm_intel %{intel_major}
+%define	lib32intel libdrm_intel%{intel_major}
+%define	nouveau_major 2
+%define	libnouveau %mklibname drm_nouveau %{nouveau_major}
+%define	lib32nouveau libdrm_nouveau%{nouveau_major}
+%define	radeon_major 1
+%define	libradeon %mklibname drm_radeon %{radeon_major}
+%define	lib32radeon libdrm_radeon%{radeon_major}
+# Amdgpu
+%define	amdgpu_major 1
+%define	libamdgpu %mklibname drm_amdgpu %{amdgpu_major}
+%define	lib32amdgpu libdrm_amdgpu%{amdgpu_major}
+# Exynos
+%define	exynos_major 1
+%define	libexynos %mklibname drm_exynos %{exynos_major}
+# Adreno
+%define	freedreno_major 1
+%define	libfreedreno %mklibname drm_freedreno %{freedreno_major}
+# Omap
+%define	omap_major 1
+%define	libomap %mklibname drm_omap %{omap_major}
+# Tegra
+%define	tegra_major 0
+%define	libtegra %mklibname drm_tegra %{tegra_major}
+# Vc4
+%define	vc4_major 0
+%define	libvc4 %mklibname drm_vc4 %{vc4_major}
+# Etnaviv
+%define	etnaviv_major 1
+%define	libetnaviv %mklibname drm_etnaviv %{etnaviv_major}
 
-# exynos
-%define exynos_major 1
-%define libexynos %mklibname drm_exynos %{exynos_major}
-# adreno
-%define freedreno_major 1
-%define libfreedreno %mklibname drm_freedreno %{freedreno_major}
-# omap
-%define omap_major 1
-%define libomap %mklibname drm_omap %{omap_major}
-# tegra
-%define tegra_major 0
-%define libtegra %mklibname drm_tegra %{tegra_major}
-# vc4
-%define vc4_major 0
-%define libvc4 %mklibname drm_vc4 %{vc4_major}
-# etnaviv
-%define etnaviv_major 1
-%define libetnaviv %mklibname drm_etnaviv %{etnaviv_major}
-
-%global optflags %{optflags} -O3
+%global	optflags %{optflags} -O3
 
 Summary:	Userspace interface to kernel DRM services
-Name:		libdrm
+Name:	libdrm
 Version:	2.4.125
-Release:	1
-Group:		System/Libraries
-License:	MIT/X11
+Release:	2
+License:	MIT
+Group:	System/Libraries
 Url:		https://dri.freedesktop.org
-Source0:	https://dri.freedesktop.org/libdrm/libdrm-%{version}.tar.xz
+Source0:	https://dri.freedesktop.org/libdrm/%{name}-%{version}.tar.xz
 Source1:	91-drm-modeset.rules
-# hardcode the 666 instead of 660 for device nodes
-Patch3:		https://src.fedoraproject.org/rpms/libdrm/raw/rawhide/f/libdrm-make-dri-perms-okay.patch
-Patch4:		https://src.fedoraproject.org/rpms/libdrm/raw/rawhide/f/libdrm-2.4.0-no-bc.patch
+Source100:	libdrm.rpmlintrc
+# Hardcode 666 instead of 660 for device nodes
+Patch1:		https://src.fedoraproject.org/rpms/libdrm/raw/rawhide/f/libdrm-make-dri-perms-okay.patch
+Patch2:		https://src.fedoraproject.org/rpms/libdrm/raw/rawhide/f/libdrm-2.4.0-no-bc.patch
+# For building man pages
+BuildRequires:	docbook-style-xsl
+BuildRequires:	docbook-dtd42-xml
+BuildRequires:	meson >= 0.59
 BuildRequires:	kernel-headers
+BuildRequires:	python
+BuildRequires:	python-docutils
+BuildRequires:	systemd-rpm-macros
+BuildRequires:	xsltproc
+%if %{with compat32}
+BuildRequires:	libc6
+BuildRequires:	devel(libatomic_ops)
+BuildRequires:	devel(libpciaccess) >= 0.10
+BuildRequires:	devel(libz)
+%endif
+BuildRequires:	pkgconfig(atomic_ops)
 BuildRequires:	pkgconfig(pciaccess)
 BuildRequires:	pkgconfig(xorg-macros)
-BuildRequires:	pkgconfig(atomic_ops)
 BuildRequires:	pkgconfig(zlib)
-BuildRequires:	meson
-BuildRequires:	systemd-rpm-macros
-%if %{with compat32}
-BuildRequires:	devel(libatomic_ops)
-BuildRequires:	devel(libpciaccess)
-BuildRequires:	devel(libz)
-BuildRequires:	libc6
-%endif
 
 %description
 Userspace interface to kernel DRM services.
 
+#-----------------------------------------------------------------------------
+
 %package common
 Summary:	Common files for the userspace interface to kernel DRM services
-Group:		System/Libraries
+Group:	System/Libraries
 
 %description common
 Common files for the userspace interface to kernel DRM services.
+
+%files common
+%dir %{_datadir}/%{name}
+%{_datadir}/%{name}/*.ids
+%{_udevrulesdir}/91-drm-modeset.rules
+
+#-----------------------------------------------------------------------------
 
 %package -n %{libname}
 Summary:	Userspace interface to kernel DRM services
@@ -90,6 +105,11 @@ Requires:	%{name}-common
 %description -n %{libname}
 Userspace interface to kernel DRM services.
 
+%files -n %{libname}
+%{_libdir}/%{name}.so.%{major}*
+
+#-----------------------------------------------------------------------------
+
 %package -n %{libintel}
 Summary:	Shared library for Intel kernel DRM services
 Group:		System/Libraries
@@ -97,12 +117,24 @@ Group:		System/Libraries
 %description -n %{libintel}
 Shared library for Intel kernel Direct Rendering Manager services.
 
+%ifarch %{ix86} %{x86_64}
+%files -n %{libintel}
+%{_libdir}/%{name}_intel.so.%{intel_major}*
+%endif
+
+#-----------------------------------------------------------------------------
+
 %package -n %{libnouveau}
 Summary:	Shared library for Nouveau kernel DRM services
 Group:		System/Libraries
 
 %description -n %{libnouveau}
 Shared library for Nouveau kernel Direct Rendering Manager services.
+
+%files -n %{libnouveau}
+%{_libdir}/%{name}_nouveau.so.%{nouveau_major}*
+
+#-----------------------------------------------------------------------------
 
 %package -n %{libradeon}
 Summary:	Shared library for Radeon kernel DRM services
@@ -112,6 +144,11 @@ Conflicts:	%{_lib}drm2 < 2.4.5-2
 %description -n %{libradeon}
 Shared library for Radeon kernel Direct Rendering Manager services.
 
+%files -n %{libradeon}
+%{_libdir}/%{name}_radeon.so.%{radeon_major}*
+
+#-----------------------------------------------------------------------------
+
 %package -n %{libamdgpu}
 Summary:	Shared library for AMD GPU kernel DRM services
 Group:		System/Libraries
@@ -119,6 +156,12 @@ Conflicts:	%{_lib}drm2 < 2.4.5-2
 
 %description -n %{libamdgpu}
 Shared library for AMD GPU kernel Direct Rendering Manager services.
+
+%files -n %{libamdgpu}
+%{_libdir}/%{name}_amdgpu.so.%{amdgpu_major}*
+
+#-----------------------------------------------------------------------------
+# 32bit libraries
 
 %if %{with compat32}
 %package -n %{lib32name}
@@ -129,12 +172,22 @@ Requires:	%{name}-common
 %description -n %{lib32name}
 Userspace interface to kernel DRM services.
 
+%files -n %{lib32name}
+%{_prefix}/lib/%{name}.so.%{major}*
+
+#-----------------------------------------------------------------------------
+
 %package -n %{lib32intel}
 Summary:	Shared library for Intel kernel DRM services (32-bit)
 Group:		System/Libraries
 
 %description -n %{lib32intel}
 Shared library for Intel kernel Direct Rendering Manager services.
+
+%files -n %{lib32intel}
+%{_prefix}/lib/%{name}_intel.so.%{intel_major}*
+
+#-----------------------------------------------------------------------------
 
 %package -n %{lib32nouveau}
 Summary:	Shared library for Nouveau kernel DRM services (32-bit)
@@ -143,6 +196,11 @@ Group:		System/Libraries
 %description -n %{lib32nouveau}
 Shared library for Nouveau kernel Direct Rendering Manager services.
 
+%files -n %{lib32nouveau}
+%{_prefix}/lib/%{name}_nouveau.so.%{nouveau_major}*
+
+#-----------------------------------------------------------------------------
+
 %package -n %{lib32radeon}
 Summary:	Shared library for Radeon kernel DRM services (32-bit)
 Group:		System/Libraries
@@ -150,12 +208,22 @@ Group:		System/Libraries
 %description -n %{lib32radeon}
 Shared library for Radeon kernel Direct Rendering Manager services.
 
+%files -n %{lib32radeon}
+%{_prefix}/lib/%{name}_radeon.so.%{radeon_major}*
+
+#-----------------------------------------------------------------------------
+
 %package -n %{lib32amdgpu}
 Summary:	Shared library for AMD GPU kernel DRM services (32-bit)
 Group:		System/Libraries
 
 %description -n %{lib32amdgpu}
 Shared library for AMD GPU kernel Direct Rendering Manager services.
+
+%files -n %{lib32amdgpu}
+%{_prefix}/lib/%{name}_amdgpu.so.%{amdgpu_major}*
+
+#-----------------------------------------------------------------------------
 
 %package -n %{dev32name}
 Summary:	Development files for %{name}
@@ -172,10 +240,19 @@ Requires:	%{lib32amdgpu} = %{version}
 
 %description -n %{dev32name}
 Development files for %{name}.
+
+%files -n %{dev32name}
+%{_prefix}/lib/%{name}*.so
+%{_prefix}/lib/pkgconfig/%{name}*.pc
+
 %endif
+# End of compat32
+
+#-----------------------------------------------------------------------------
 
 # ARM stuff
 
+%ifarch %{armx} %{riscv}
 #
 #Samsung Exynos video
 #
@@ -187,6 +264,11 @@ Conflicts:	%{_lib}drm2 < 2.4.5-2
 %description -n %{libexynos}
 Shared library for Radeon kernel Direct Rendering Manager services.
 
+%files -n %{libexynos}
+%{_libdir}/%{name}_exynos.so.%{exynos_major}*
+
+#-----------------------------------------------------------------------------
+
 #
 #Free Adreno
 #
@@ -197,18 +279,10 @@ Group:		System/Libraries
 %description -n %{libfreedreno}
 Shared library for Adreno kernel Direct Rendering Manager services.
 
-#
-#Omap
-#
-%ifarch %{arm}
-%package -n %{libomap}
-Summary:	Shared library for OMAP kernel DRM services
-Group:		System/Libraries
-Conflicts:	%{_lib}drm2 < 2.4.5-2
+%files -n %{libfreedreno}
+%{_libdir}/%{name}_freedreno.so.%{freedreno_major}*
 
-%description -n %{libomap}
-Shared library for OMAP kernel Direct Rendering Manager services.
-%endif
+#-----------------------------------------------------------------------------
 
 #
 #tegra
@@ -220,6 +294,11 @@ Conflicts:	%{_lib}drm2 < 2.4.5-2
 
 %description -n %{libtegra}
 Shared library for Tegra kernel Direct Rendering Manager services.
+
+%files -n %{libtegra}
+%{_libdir}/%{name}_tegra.so.%{tegra_major}*
+
+#-----------------------------------------------------------------------------
 
 # For now (2.4.70), VC4 is just a set of headers - no binary built
 #
@@ -233,6 +312,13 @@ Conflicts:	%{_lib}drm2 < 2.4.5-2
 %description -n %{libvc4}
 Shared library for Broadcom VC4 kernel Direct Rendering Manager services.
 
+%if 0
+%files -n %{libvc4}
+%{_libdir}/%{name}_vc4.so.%{vc4_major}*
+%endif
+
+#-----------------------------------------------------------------------------
+
 #
 #etnaviv
 #
@@ -244,9 +330,35 @@ Conflicts:	%{_lib}drm2 < 2.4.5-2
 %description -n %{libetnaviv}
 Shared library for Etnaviv kernel Direct Rendering Manager services.
 
+%files -n %{libetnaviv}
+%{_libdir}/%{name}_etnaviv.so.%{etnaviv_major}*
+
+%endif
+#  End of %%{armx} and %%{riscv}
+
+#-----------------------------------------------------------------------------
+
+#
+#Omap
+#
+%ifarch %{arm}
+%package -n %{libomap}
+Summary:	Shared library for OMAP kernel DRM services
+Group:		System/Libraries
+Conflicts:	%{_lib}drm2 < 2.4.5-2
+
+%description -n %{libomap}
+Shared library for OMAP kernel Direct Rendering Manager services.
+
+%files -n %{libomap}
+%{_libdir}/%{name}_omap.so.%{omap_major}*
+%endif
+
+#-----------------------------------------------------------------------------
+
 %package -n %{devname}
 Summary:	Development files for %{name}
-Group:		Development/X11
+Group:	Development/X11
 Requires:	%{libname} = %{version}
 %ifarch %{ix86} %{x86_64}
 Requires:	%{libintel} = %{version}
@@ -267,14 +379,33 @@ Requires:	%{libvc4} = %{version}
 %ifarch %{arm}
 Requires:	%{libomap} = %{version}
 %endif
-Obsoletes:	%{_lib}drm-static-devel
+%rename	%{_lib}drm-static-devel
 
 %description -n %{devname}
 Development files for %{name}.
 
+%files -n %{devname}
+%{_includedir}/%{name}
+%{_includedir}/*.h
+%ifarch %{armx} %{riscv}
+%{_includedir}/exynos/
+%{_includedir}/freedreno/
+%endif
+%ifarch %{arm}
+%{_includedir}/omap/
+%endif
+%{_libdir}/%{name}*.so
+%{_libdir}/pkgconfig/%{name}*.pc
+%{_mandir}/man3/drm*.3*
+%{_mandir}/man7/drm*.7*
+
+#-----------------------------------------------------------------------------
+
 %prep
 %autosetup -p1
 
+
+%build
 %if %{with compat32}
 %meson32 \
 %ifarch %{ix86} %{x86_64}
@@ -291,10 +422,12 @@ Development files for %{name}.
 	-Dradeon=enabled \
 	-Damdgpu=enabled \
 	-Dnouveau=enabled \
-	-Dcairo-tests=disabled \
+	-Dvmwgfx=enabled \
 	-Dvalgrind=disabled \
+	-Dcairo-tests=disabled \
 	-Dtests=false \
-	-Dman-pages=disabled
+	-Dman-pages=disabled \
+	-Dinstall-test-programs=false
 %endif
 
 %meson \
@@ -324,18 +457,19 @@ Development files for %{name}.
 	-Dradeon=enabled \
 	-Damdgpu=enabled \
 	-Dnouveau=enabled \
-	-Dcairo-tests=disabled \
+	-Dvmwgfx=enabled \
 	-Dvalgrind=disabled \
 	-Dtests=false \
+	-Dcairo-tests=disabled \
 	-Dudev=true \
-	-Dman-pages=disabled
+	-Dman-pages=enabled \
+	-Dinstall-test-programs=true
 
-
-%build
 %if %{with compat32}
 %ninja_build -C build32
 %endif
 %meson_build
+
 
 %install
 %if %{with compat32}
@@ -345,83 +479,3 @@ Development files for %{name}.
 
 install -m644 %{SOURCE1} -D %{buildroot}%{_udevrulesdir}/91-drm-modeset.rules
 
-%files common
-%dir %{_datadir}/%{name}
-%{_datadir}/%{name}/*.ids
-%{_udevrulesdir}/91-drm-modeset.rules
-
-%files -n %{libname}
-%{_libdir}/libdrm.so.%{major}*
-
-%ifarch %{ix86} %{x86_64}
-%files -n %{libintel}
-%{_libdir}/libdrm_intel.so.%{intel_major}*
-%endif
-
-%files -n %{libnouveau}
-%{_libdir}/libdrm_nouveau.so.%{nouveau_major}*
-
-%files -n %{libradeon}
-%{_libdir}/libdrm_radeon.so.%{radeon_major}*
-
-%files -n %{libamdgpu}
-%{_libdir}/libdrm_amdgpu.so.%{amdgpu_major}*
-
-%ifarch %{armx} %{riscv}
-%files -n %{libexynos}
-%{_libdir}/libdrm_exynos.so.%{exynos_major}*
-
-%files -n %{libfreedreno}
-%{_libdir}/libdrm_freedreno.so.%{freedreno_major}*
-
-%files -n %{libtegra}
-%{_libdir}/libdrm_tegra.so.%{tegra_major}*
-
-%files -n %{libetnaviv}
-%{_libdir}/libdrm_etnaviv.so.%{etnaviv_major}*
-
-# No binary yet, but the headers are useful
-%if 0
-%files -n %{libvc4}
-%{_libdir}/libdrm_vc4.so.%{vc4_major}*
-%endif
-%endif
-
-%ifarch %{arm}
-%files -n %{libomap}
-%{_libdir}/libdrm_omap.so.%{omap_major}*
-%endif
-
-%files -n %{devname}
-%{_includedir}/libdrm
-%{_includedir}/*.h
-%ifarch %{armx} %{riscv}
-%{_includedir}/exynos/
-%{_includedir}/freedreno/
-%endif
-%ifarch %{arm}
-%{_includedir}/omap/
-%endif
-%{_libdir}/libdrm*.so
-%{_libdir}/pkgconfig/libdrm*.pc
-
-%if %{with compat32}
-%files -n %{lib32name}
-%{_prefix}/lib/libdrm.so.%{major}*
-
-%files -n %{lib32intel}
-%{_prefix}/lib/libdrm_intel.so.%{intel_major}*
-
-%files -n %{lib32nouveau}
-%{_prefix}/lib/libdrm_nouveau.so.%{nouveau_major}*
-
-%files -n %{lib32radeon}
-%{_prefix}/lib/libdrm_radeon.so.%{radeon_major}*
-
-%files -n %{lib32amdgpu}
-%{_prefix}/lib/libdrm_amdgpu.so.%{amdgpu_major}*
-
-%files -n %{dev32name}
-%{_prefix}/lib/libdrm*.so
-%{_prefix}/lib/pkgconfig/libdrm*.pc
-%endif
